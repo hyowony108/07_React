@@ -1,11 +1,27 @@
 import React, { useEffect, useState } from "react";
 import { axiosApi } from "../api/axiosApi";
+import App from "./../App";
 
 export default function Statistics() {
   const [readCountData, setReadCountData] = useState(null);
   const [likeCountData, setLikeCountData] = useState(null);
   const [commentCountData, setCommentCountData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [newSignUpData, setNewSignUpData] = useState(null);
+
+  // 신규 가입한 회원 조회
+  const getMaxSignCount = async () => {
+    try {
+      const resp = await axiosApi.get("/admin/MaxSignCount");
+      console.log(resp.data);
+
+      if (resp.status === 200) {
+        setNewSignUpData(resp.data);
+      }
+    } catch (error) {
+      console.log("최대 조회 수 게시글 조회 중 예외 발생 : ", error);
+    }
+  };
 
   // 최대 조회 수 게시글 조회
   const getMaxReadCount = async () => {
@@ -52,6 +68,7 @@ export default function Statistics() {
   // 컴포넌트가 처음 마운트 될 때 딱 1번만 실행
   // -> Statistics 컴포넌트가 화면에 마운트 될 때 서버로 세가지 데이터 요청, 응답받아야함.
   useEffect(() => {
+    getMaxSignCount();
     getMaxReadCount();
     getMaxLikeCount();
     getMaxCommentCount();
@@ -61,19 +78,48 @@ export default function Statistics() {
   // -> isLoading 상태값을 false로 변경하기
   useEffect(() => {
     if (
+      newSignUpData != null &&
       readCountData != null &&
       likeCountData != null &&
       commentCountData != null
     ) {
       setIsLoading(false);
     }
-  }, [readCountData, likeCountData, commentCountData]);
+  }, [newSignUpData, readCountData, likeCountData, commentCountData]);
 
   if (isLoading) {
     return <h1>Loading...</h1>;
   } else {
     return (
       <div>
+        <section className="statistics-signUp">
+          <h2>신규 가입 회원 ({newSignUpData.length}명)</h2>
+
+          <p>[7일 이내 가입 회원]</p>
+
+          <table>
+            <thead>
+              <tr>
+                <th>회원번호</th>
+                <th>이메일</th>
+                <th>닉네임</th>
+                <th>가입일</th>
+              </tr>
+            </thead>
+            <tbody>
+              {/* newSignUpData 배열을 map을 통해 순회 */}
+              {newSignUpData.map((member, index) => (
+                <tr key={index}>
+                  <td>{member.memberNo}</td>
+                  <td>{member.memberEmail}</td>
+                  <td>{member.memberNickname}</td>
+                  <td>{member.enrollDate}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+
         <section className="statistics-section">
           <h2>가장 조회수 많은 게시글</h2>
           <p>게시판 종류 : {readCountData.boardName}</p>

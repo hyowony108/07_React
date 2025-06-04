@@ -11,6 +11,12 @@ import {
 // https://recharts.org/en-US
 
 function Chart() {
+  // useEffect -> 함수형 컴포넌트에서 생명주기를 다룰 수 있는 hook
+  //  useEffect((=> {
+  //   // 컴포넌트가 화면에 마운트 되었을 때, 업데이트가 일어날때
+
+  //   return()
+  //  }))
   const data = [
     // 오늘기준으로 일주일(7일내)의 데이터를 얻어옴
     {
